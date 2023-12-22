@@ -13,6 +13,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import daos.DaoExcel;
 
 /**
  *
@@ -144,16 +145,7 @@ public class OptionsCreation extends javax.swing.JPanel {
 
     private void excelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_excelActionPerformed
         File fichier = conExcel.chosirFichier(panel);
-        JTextField libelle = ((Creation)panel.getComponent(5)).getLibelle();
-        JTextField nom = ((Creation)panel.getComponent(5)).getNomRedevable();
-        JTextField montant = ((Creation)panel.getComponent(5)).getMontant();
-        JTable echeances = ((Creation)panel.getComponent(5)).getListeEcheances();
-        JComboBox agentComptable = ((Creation)panel.getComponent(5)).getListeAgent();
-        ((Creation)panel.getComponent(5)).setListeAgent(conCreation.afficherAgent(agentComptable));
-        JComboBox nbEcheances =((Creation)panel.getComponent(5)).getNbEcheances();
-        ((Creation)panel.getComponent(5)).setNbEcheances(conCreation.afficherEcheances(nbEcheances));
-        conExcel.ajouterDonnees(fichier, nom, libelle, montant, echeances);
-        ((CardLayout)panel.getLayout()).show(panel, "p7");
+        DaoExcel.addFromExcel(fichier);
         
     }//GEN-LAST:event_excelActionPerformed
 
