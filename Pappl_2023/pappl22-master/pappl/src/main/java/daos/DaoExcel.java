@@ -38,6 +38,8 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import static java.lang.Double.parseDouble;
+import static org.apache.poi.ss.usermodel.CellType.STRING;
 
 /**
  *
@@ -287,5 +289,54 @@ public class DaoExcel {
             
         }
         return detSimp;    
-    }       
+    }   
+
+    /**
+     * Cette methode prend en argument un fichier Excel et ajoute à la base
+     * de donnée les echances du fichier
+     * @param fichier 
+     */
+    public static void addFromExcel(File fichier){
+        try{
+            FileInputStream file = new FileInputStream(fichier);
+            Workbook workbook = new XSSFWorkbook(file);
+            Sheet sheet = workbook.getSheetAt(0);
+            boolean first = true;
+            for (Row row : sheet){
+                if (first){
+                    first = false;
+                }
+                else{
+                    String nom = row.getCell(1).getStringCellValue();
+                    String prenom = row.getCell(2).getStringCellValue();
+                    String mail = prenom + "." + nom + "@eleves.ec-nantes.fr";
+                    String nomComplet = prenom + " " + nom;
+                    Date date = row.getCell(7).getDateCellValue();
+                    if (date==null){date = row.getCell(8).getDateCellValue();}
+                    LocalDate deadline;
+                    if (date==null){deadline = LocalDate.of(2000, 01, 01);}
+                    
+                    else{
+                        deadline = date.toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate();
+                    }
+                    double montant;
+                    if (row.getCell(6).getCellType()==STRING){
+                        String montant_st = row.getCell(6).getStringCellValue();
+                        montant_st = montant_st.replace(",", "");
+                        montant = parseDouble(montant_st);
+                        System.out.println(montant);
+                    }else{
+                        montant = row.getCell(6).getNumericCellValue();
+                    }
+                    EcheanceSimplifiee echeance = new EcheanceSimplifiee(deadline, montant);
+                    ArrayList<EcheanceSimplifiee> list = new ArrayList<>();
+                    list.add(echeance);
+                    DaoCreation dc = new DaoCreation();
+                    dc.CreationRedevable(nomComplet, mail, list, "Import Ecxel", ""+montant, "", "", "", "Import");
+                }
+            }
+        }catch (Exception e){System.out.println(e);}
+    }
 }
